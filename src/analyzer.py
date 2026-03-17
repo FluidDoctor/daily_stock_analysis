@@ -26,6 +26,7 @@ from src.config import Config, get_config, get_api_keys_for_model, extra_litellm
 from src.storage import persist_llm_usage
 from src.data.stock_mapping import STOCK_NAME_MAP
 from src.schemas.report_schema import AnalysisReportSchema
+from src.utils.llm_safe import safe_llm_call   #
 
 logger = logging.getLogger(__name__)
 
@@ -881,6 +882,15 @@ class GeminiAnalyzer:
             return None
 
     def analyze(
+        self, 
+        context: Dict[str, Any],
+        news_context: Optional[str] = None
+    ) -> AnalysisResult:
+        return safe_llm_call(
+            lambda: self._analyze_impl(context, news_context)
+        )
+    
+    def _analyze_impl(
         self, 
         context: Dict[str, Any],
         news_context: Optional[str] = None
